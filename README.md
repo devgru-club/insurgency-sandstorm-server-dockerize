@@ -1,17 +1,19 @@
 ## Insurgency: Sandstorm Docker Container
-[![Docker Image CI](https://github.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/actions/workflows/docker-image.yml/badge.svg)](https://github.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/actions/workflows/docker-image.yml)
-[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/andrewmhub/insurgency-sandstorm/latest)](https://hub.docker.com/r/andrewmhub/insurgency-sandstorm)
-[![Docker Pulls](https://img.shields.io/docker/pulls/andrewmhub/insurgency-sandstorm)](https://hub.docker.com/r/andrewmhub/insurgency-sandstorm)
+This image is based on https://github.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize, but I changed ENTRYPOINT so you can use LAUNCH_SERVER_ENV to set map and traveloptions.
 
 <p align="center">
-  <img src="https://github.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/blob/master/sandstorm-logo.png">
-  <img src="https://github.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/blob/master/docker-logo.png"
+  <img src="https://github.com/DanTheManSWE/insurgency-sandstorm-server-dockerize/blob/master/sandstorm-logo.png">
+  <img src="https://github.com/DanTheManSWE/insurgency-sandstorm-server-dockerize/blob/master/docker-logo.png"
 </p>
 </p>
+
+
+
+Readme shamelessly ripped from Andrew Marchukov.
 
 This repository contains a docker image with a dedicated server for Insurgency Sandstorm that you can fully customize to your need for COOP and PVP servers.
 
-This image will be build daily so you don’t have to update anything inside a container. I tried to build the image as “best-practice” as possible and to document everything for you.
+Image is not built on a regular basis, but I'll try to keep it updated as long as I play the game.
 #### Official documentation: [Sandstorm Server Admin Guide](https://sandstorm-support.newworldinteractive.com/hc/en-us/articles/360049211072-Server-Admin-Guide)
 #### Another Server Admin Guide [Server Admin Guide by mod.io](https://insurgencysandstorm.mod.io/guides/server-admin-guide)
 #### More config examples: [Configs by zWolfi](https://github.com/zWolfi/INS_Sandstorm)
@@ -19,15 +21,15 @@ This image will be build daily so you don’t have to update anything inside a c
 
 ## How to build/get Insurgency Sandstorm dedicated server
 cd directory where ```Dockerfile```
-```docker build -t andrewmhub/insurgency-sandstorm:latest .``` or get it on [docker hub](https://hub.docker.com/r/andrewmhub/insurgency-sandstorm) ```docker pull andrewmhub/insurgency-sandstorm```
+```docker build -t danthemanswe/insurgencysandstorm:latest .``` or get it on [docker hub](https://hub.docker.com/r/danthemanswe/insurgencysandstorm) ```docker pull danthemanswe/insurgencysandstorm```
 ## How to launch Insurgency Sandstorm dedicated server
 Running multiple instances (use PORT, QUERYPORT and HOSTNAME) and LAUNCH_SERVER_ENV in [modmap.env](https://github.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/blob/master/modmap.env): 
 ```
-docker run -d --restart always --env-file /home/user/coop-modmap/modmap.env \
+docker run -d --restart always --env-file /home/user/Insurgency/modmap.env \
 --name sandstorm-modmap --net=host \
--v /home/user/coop-modmap/Mods:/home/steam/steamcmd/sandstorm/Insurgency/Mods:rw \
--v /home/user/coop-modmap/config/ini:/home/steam/steamcmd/sandstorm/Insurgency/Saved/Config/LinuxServer:ro \
--v /home/user/coop-modmap/config/txt:/home/steam/steamcmd/sandstorm/Insurgency/Config/Server:ro andrewmhub/insurgency-sandstorm:latest
+-v /home/user/Insurgency/Mods:/home/steam/steamcmd/sandstorm/Insurgency/Mods:rw \
+-v /home/user/Insurgency/Saved/Config/LinuxServer:/home/steam/steamcmd/sandstorm/Insurgency/Saved/Config/LinuxServer:ro \
+-v /home/user/Insurgency/Config/Server:/home/steam/steamcmd/sandstorm/Insurgency/Config/Server:ro andrewmhub/insurgency-sandstorm:latest
 ```
 Examples config files in directory [config](https://github.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/tree/master/config)
 
@@ -36,58 +38,119 @@ Examples config files in directory [config](https://github.com/AndrewMarchukov/i
 version: '3.7'
 services:
   insurgency-sandstorm:
-    image: andrewmhub/insurgency-sandstorm:latest
+    image: danthemanswe/insurgencysandstorm:latest
     container_name: insurgency-sandstorm
     restart: unless-stopped
     env_file:
        - .env
     volumes:
-      - /home/user/coop-modmap/config/ini:/home/steam/steamcmd/sandstorm/Insurgency/Saved/Config/LinuxServer:ro
-      - /home/user/coop-modmap/config/txt:/home/steam/steamcmd/sandstorm/Insurgency/Config/Server:ro
-      - /home/user/coop-modmap/Mods:/home/steam/steamcmd/sandstorm/Insurgency/Mods:rw
+      - ./Saved/Config/LinuxServer:/home/steam/steamcmd/sandstorm/Insurgency/Saved/Config/LinuxServer:rw
+      - ./Config/Server:/home/steam/steamcmd/sandstorm/Insurgency/Config/Server:rw
+      - ./Mods:/home/steam/steamcmd/sandstorm/Insurgency/Mods:rw
     ports:
-      - "${PORT}:${PORT}"
-      - "${QUERYPORT}:${QUERYPORT}"
+      - "${PORT}:${PORT}/udp"
+      - "${QUERYPORT}:${QUERYPORT}/udp"
 ```
 ### .env example
 
 ```.env
-HOSTNAME=[ISMC] MOD MAPS ONLY @120hz
-PORT=12345
-QUERYPORT=54321
-LAUNCH_SERVER_ENV=-MapCycle=MapCycle -Mods ModList=Mods.txt -mutators=ISMCarmory_legacy,ImprovedAI,NoRestrictedArea,ScaleBotAmount,AdvancedSupplyPoints,WelcomeMessage,JoinLeaveMessage,FpLegs,JumpShoot -GameStatsToken=my_token -GameStats -GSLTToken=my_token -ModDownloadTravelTo=TORO?Scenario=Scenario_TORO_Checkpoint_Security
+LAUNCH_SERVER_ENV=Ministry?Scenario=Scenario_Ministry_Checkpoint_Security?Game=CheckpointHardcore?password=YourPassword?MaxPlayers=16 -MapCycle=MapCycle -GameStatsToken=Your_GameStatsToken -GameStats -GSLTToken=Your_GSLTToken
+HOSTNAME=My Hardcore Checkpoint Server
+PORT=27102
+QUERYPORT=27131
 ```
 
-## Server auto update
-Autoupdate game server. This script will keep your game servers automaticly updated updating intervals announce the server is shutting down for updates
+### Engine.ini example
+```.ini
+;Logging and also show in console
+;Different kind of log like Log, Display, Verbose, VeryVerbose
+[Core.Log]
+LogGameplayEvents=Verbose
+LogDemo=Verbose
+LogObjectives=Verbose
+LogGameMode=Verbose
+LogNet=Verbose
+LogINSGameInstance=Verbose
+LogUObjectGlobals=Verbose
 
-Requirements: [rcon-cli](https://github.com/gorcon/rcon-cli/releases)
-```
-wget https://github.com/gorcon/rcon-cli/releases/download/v0.9.1/rcon-0.9.1-amd64_linux.tar.gz
-tar -xvzf rcon-0.9.1-amd64_linux.tar.gz
-cp rcon-0.9.1-amd64_linux/rcon /usr/local/bin/
+[/Script/OnlineSubsystemUtils.IpNetDriver]
+MaxInternetClientRate=70000
+MaxClientRate=70000
+
+;Change server TickRate (Default 60)
+NetServerMaxTickRate=128
+LanServerMaxTickRate=128
+
+;Connection TimeOut Time
+ConnectionTimeout=80.0
+InitialConnectTimeout=150.0
+
+;https://docs.unrealengine.com/en-US/API/Runtime/PacketHandler/FDDoSDetection/index.html
+[DDoSDetection]
+bDDoSDetection=True
+bDDoSAnalytics=True
+DDoSLogSpamLimit=64
+HitchTimeQuotaMS=500
+HitchFrameTolerance=3
+
+[/Script/Engine.Engine]
+bAllowMatureLanguage=True
+bSmoothFrameRate=True
+
+;https://docs.unrealengine.com/en-US/API/Runtime/AIModule/Navigation/UCrowdManager/index.html
+;make AI into squad/group (Need testing)
+[/Script/AIModule.CrowdManager]
+bResolveCollisions=True
+;Radius to gather agents
+MaxAgentRadius=2000.0
+;Max number of agents in a group
+MaxAgents=4
+MaxAvoidedAgents=2
+
+[URL]
+;Game port
+Port=27102
+
+[OnlineSubsystemSteamNWI]
+;Queryport for steam
+GameServerQueryPort=27131
+;Enable VAC on server or not
+bVACEnabled=1
+
+;Override the maxplayer amount (No longer need in new version)
+;[SystemSettings]
+;net.MaxPlayersOverride=20
+
+[/Script/Insurgency.INSWorldSettings]
+bShowBreath=True
+;Map always night map
+bAlwaysNight=False
+;Allow random lighting scenario (Day/Night map)
+bRandomLightingScenario=True
+
 ```
 
-Get restart script example
+### Game.ini example
+```.ini
+[/Script/Insurgency.INSGameMode]
+bKillFeed=False
+
+[/Script/Insurgency.INSMultiplayerMode]
+bAllowFriendlyFire=True
+RoundLimit=2
+bUseMapCycle=True
+bMapVoting=True
+
+[/Script/Insurgency.INSCoopMode]
+MinimumEnemies=8
+MaximumEnemies=14
+
+[/Script/Insurgency.INSCheckpointGameMode]
+DefendTimer=150
+DefendTimerFinal=300
 
 ```
-wget --no-check-certificate -O /opt/restart-ins.sh https://raw.githubusercontent.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/master/AutoUpdater/restart-ins.sh
-chmod +x /opt/restart-ins.sh
-```
-The next script make version comparison
-if game server version changed in steam or ISMC mod version you insurgency sandstorm server will automatically restarted and get update
 
-```
-wget --no-check-certificate -O /opt/check-manifest.sh https://raw.githubusercontent.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/master/AutoUpdater/check-manifest.sh
-chmod +x /opt/check-manifest.sh
-```
-Get systemd unit daemon
-```
-wget --no-check-certificate -O /etc/systemd/system/my-server-check.service https://raw.githubusercontent.com/AndrewMarchukov/insurgency-sandstorm-server-dockerize/master/AutoUpdater/my-server-check.service
-systemctl daemon-reload
-systemctl enable my-server-check.service
-systemctl start my-server-check.service
-```
 ## Tips and Tricks
 ### How to save RAM on UE4 Linux(Docker) dedicated server
 
