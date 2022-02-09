@@ -13,7 +13,7 @@ Readme shamelessly ripped from Andrew Marchukov.
 
 This repository contains a docker image with a dedicated server for Insurgency Sandstorm that you can fully customize to your need for COOP and PVP servers.
 
-Image is not built on a regular basis, but I'll try to keep it updated as long as I play the game.
+Image is not built on a regular basis, yet, but we will try to keep it updated as long as we play the game.
 #### Official documentation: [Sandstorm Server Admin Guide](https://sandstorm-support.newworldinteractive.com/hc/en-us/articles/360049211072-Server-Admin-Guide)
 #### Another Server Admin Guide [Server Admin Guide by mod.io](https://insurgencysandstorm.mod.io/guides/server-admin-guide)
 #### More config examples: [Configs by zWolfi](https://github.com/zWolfi/INS_Sandstorm)
